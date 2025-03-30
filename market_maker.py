@@ -21,13 +21,13 @@ class MarketMaker:
         self.alpha = 0.2  # weighting of new parameters
         self.mid = None
         self.width = None
-        self.default_size = random.randrange(30, 101, 10)
+        self.DEFAULT_SZ = random.randrange(30, 101, 10)
         self.adjust_width()
-        print("fair =", stockinfo.stock)
 
     def adjust_width(self):
         if self.width is None:
-            self.width = max(random.weibullvariate(0.2, 1.5), 0.02)
+            self.width = max(random.weibullvariate(0.2, 1.5), 0.02) # mean 0.155
+            self.width = min(self.width, 0.4)
         else:
             self.width = (
                 self.alpha * random.triangular(0.02, 2 * self.CONV_WIDTH - 0.02)
@@ -45,23 +45,23 @@ class MarketMaker:
             self.mid = self.alpha * newprice + (1 - self.alpha) * self.mid
             self.mid = max(self.mid, oldprice - self.edge)
             self.mid = min(self.mid, oldprice + self.edge)
-        print(self.mid, uptick)
         self.impact = self.width * 10
         return uptick
 
     def format_quote(self, bid, bs, offer, os):
-        return f"{bid:.2f}/{bs:.0f} @ {offer:.2f}/{os:.0f}"
+        return f"Stock: {bid:.2f}/{bs:.0f} @ {offer:.2f}/{os:.0f}"
 
     def quote(self, b=1, o=1):
         self.bid = self.mid - self.edge
         self.offer = self.mid + self.edge
-        self.bidsize = round(self.default_size * b / 10) * 10
-        self.offersize = round(self.default_size * o / 10) * 10
+        self.bidsize = round(self.DEFAULT_SZ * b / 10) * 10
+        self.offersize = round(self.DEFAULT_SZ * o / 10) * 10
         return self.format_quote(self.bid, self.bidsize, self.offer, self.offersize)
 
     def trade(self, side, price, size):
+        print("side", side, " price", price, " size", size)
         # trade size relative to stock quotes, typically mean 3
-        rel_size = size / self.default_size
+        rel_size = size / self.DEFAULT_SZ
         alpha = norm.cdf(rel_size, loc=3, scale=1.5)
         # cap the effect of price
         price = min(price, self.mid + rel_size * self.edge)
@@ -71,7 +71,6 @@ class MarketMaker:
             side == "sell" and price < self.mid
         ):
             self.mid = alpha * price + (1 - alpha) * self.mid
-            print("alpha", alpha, " new mid", self.mid)
 
         # add in some random movement
         old_fair = self.mid
