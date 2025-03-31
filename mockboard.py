@@ -44,6 +44,10 @@ class MockBoard:
         print(board.round(2).to_string(index=False))
 
     def make_markets(self):
+        stock = self.stock
+        rc = self.stockinfo.rc
+        strikes = self.stockinfo.strikes
+        calls, puts = self.stockinfo.get_options(stock)
         print("Press enter to make markets...")
         while True:
             action = input()
