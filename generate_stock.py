@@ -36,7 +36,7 @@ class StockProperties:
         self.rc = round(self.rc, 2)
         self.sigma = random.uniform(20, 40) / self.stock
 
-    def get_options(self, stock = None):
+    def get_options(self, stock=None):
         if stock is None:
             stock = self.stock
         self.calls = [
@@ -85,15 +85,15 @@ class StockProperties:
         elif "combo" in ins:
             return f"{strike1} {ins}"
 
-    def choose_ins(self, ref = None):
-        if ref is None: 
+    def choose_ins(self, ref=None):
+        if ref is None:
             ref = self.stock
         ins = random.choices(["combo", "call", "put"], weights=[5, 1, 1])[0]
         strike = self.strikes[0]
         if ins == "combo":
             strike = random.choice(self.strikes)
             if strike > ref:
-                ins = "p.o. combo" 
+                ins = "p.o. combo"
         elif ins == "put":
             strike = self.strikes[-1]
-        return ins, round(float(strike),1)
+        return ins, round(float(strike), 1)

@@ -4,22 +4,24 @@ from mockboard import MockBoard
 import random
 import re
 
+
 def get_digits_prefix(text):
-    match = re.match(r'^[\d.]+', text)
+    match = re.match(r"^[\d.]+", text)
     return match.group(0) if match else ""
 
+
 class CustomerOrders:
-    def __init__(self, stockinfo : StockProperties, mm : MarketMaker):
+    def __init__(self, stockinfo: StockProperties, mm: MarketMaker):
         self.stockinfo = stockinfo
         self.mm = mm
-        self.orders = dict() # (ins, strike, side) : (price, size)
-        self.P = 0.5 # probability of informed customer
-        self.Pmarket = 0.5 # probability of making market before cust order
-    
+        self.orders = dict()  # (ins, strike, side) : (price, size)
+        self.P = 0.5  # probability of informed customer
+        self.Pmarket = 0.5  # probability of making market before cust order
+
     def generate_order(self, quote=None):
         informed = random.random() < self.P
-        edge = random.expovariate(lambd=80) # mean 1/80
-        '''
+        edge = random.expovariate(lambd=80)  # mean 1/80
+        """
         if informed, 
             - if market maker range contains fair then buy or sell a few cents
               away from fair.
@@ -28,7 +30,7 @@ class CustomerOrders:
               have been provided for instrument, this is a market order
         if not informed,
             - generate new fair with distribution around mid and behave like informed
-        '''
+        """
         fair = self.stockinfo.stock
         if not informed:
             fair = random.gauss(self.mm.mid, self.mm.width)
@@ -37,19 +39,18 @@ class CustomerOrders:
         if quote is not None:
             bid, ask = quote
 
-        side = random.choice([-1,1])
+        side = random.choice([-1, 1])
         price = None
         if bid <= fair <= ask:
             price = fair - side * edge
         elif fair > ask:
             side = 1
-            price = random.uniform(ask+0.01, ask + self.mm.edge)
+            price = random.uniform(ask + 0.01, ask + self.mm.edge)
         elif fair < bid:
             side = -1
-            price = random.uniform(bid - self.mm.edge, bid-0.01)
-            
-        return side, price
+            price = random.uniform(bid - self.mm.edge, bid - 0.01)
 
+        return side, price
 
     def parse_action(self, action):
         """
@@ -62,7 +63,7 @@ class CustomerOrders:
             # new customer order and print resting orders
             self.next_step()
             return
-        if action[-1] == 'k':
+        if action[-1] == "k":
             side, price, size = action.split()
             price = float(price)
             size = int(size[:-1]) * 10
@@ -70,8 +71,8 @@ class CustomerOrders:
             newquote = self.mm.trade(side, price, size)
             print(newquote)
         else:
-            side, strike, ins = action.split(' ', 2)
-            strike = round(float(get_digits_prefix(strike)),1)
+            side, strike, ins = action.split(" ", 2)
+            strike = round(float(get_digits_prefix(strike)), 1)
             side = "offer" if side == "buy" else "bid"
             s = -1 if side == "offer" else 1
             custtext = self.stockinfo.ins_to_text(ins, strike) + f" {side}"
@@ -82,8 +83,6 @@ class CustomerOrders:
                 print(f"{custtext} not found")
                 print(self.orders.keys())
 
-
-
     def next_step(self):
         # print resting orders then
         # either ask for market or show customer order
@@ -92,27 +91,31 @@ class CustomerOrders:
             for key in self.orders:
                 ins, strike, side = key
                 price, size = self.orders[key]
-                side = "bid" if side==1 else "offer"
-                print(f"{self.stockinfo.ins_to_text(ins,strike)} {size}x {side} {price:.2f}")
-            print('\n') 
+                side = "bid" if side == 1 else "offer"
+                print(
+                    f"{self.stockinfo.ins_to_text(ins, strike)} {size}x {side} {price:.2f}"
+                )
+            print("\n")
 
         ins, strike = self.stockinfo.choose_ins(self.mm.mid)
-        size = self.mm.DEFAULT_SZ * random.randint(1,13)
+        size = self.mm.DEFAULT_SZ * random.randint(1, 13)
         instext = self.stockinfo.ins_to_text(ins, strike)
         quote = None
         stockquote = None
         if random.random() < self.Pmarket:
             print(f"Make a market in {instext} {size}x")
-            quote = list(map(float,input().split()))
-            stockquote = tuple(map(lambda p : self.stockinfo.ins_to_stock(p,ins,strike), quote))
+            quote = list(map(float, input().split()))
+            stockquote = tuple(
+                map(lambda p: self.stockinfo.ins_to_stock(p, ins, strike), quote)
+            )
             stockquote = tuple(sorted(stockquote))
-            print("implied stock", stockquote) # TODO: remove after testing
-        
+            print("implied stock", stockquote)  # TODO: remove after testing
+
         s, price = self.generate_order(stockquote)
-        print(f"(stock {s} {price}", end='')
-        s, price = self.stockinfo.stock_to_ins(s,price,ins,strike)
-        print(f"{instext} {s} {price})") # TODO: remove after testing
-        side = "bid" if s==1 else "offer"
+        print(f"(stock {s} {price}", end="")
+        s, price = self.stockinfo.stock_to_ins(s, price, ins, strike)
+        print(f"{instext} {s} {price})")  # TODO: remove after testing
+        side = "bid" if s == 1 else "offer"
         if quote is not None and side == "bid" and price >= quote[1]:
             print(f"Cust buys at {quote[1]}")
         elif quote is not None and side == "offer" and price <= quote[0]:
@@ -121,10 +124,9 @@ class CustomerOrders:
             print(f"{instext} {size}x cust {side}s {price:.2f}")
             if (ins, strike, s) in self.orders:
                 oldprice, _ = self.orders[(ins, strike, s)]
-                self.orders[(ins,strike,s)] = (s * max(s*oldprice,s*price), size)
+                self.orders[(ins, strike, s)] = (s * max(s * oldprice, s * price), size)
             else:
-                self.orders[(ins,strike,s)] = (price, size)
-            
+                self.orders[(ins, strike, s)] = (price, size)
 
     def start(self):
         print(self.mm.quote())
@@ -143,4 +145,3 @@ if __name__ == "__main__":
     board = MockBoard(stockinfo, mm.mid, mm.quote())
     board.print_board()
     cust.start()
-

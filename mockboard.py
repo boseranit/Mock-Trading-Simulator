@@ -6,7 +6,7 @@ from generate_stock import StockProperties
 
 
 class MockBoard:
-    def __init__(self, stockinfo : StockProperties, stock = None, quote = None):
+    def __init__(self, stockinfo: StockProperties, stock=None, quote=None):
         self.stockinfo = stockinfo
         self.stock = stock
         if stock is None:
@@ -20,7 +20,7 @@ class MockBoard:
         calls, puts = self.stockinfo.get_options(stock)
 
         board = pd.DataFrame({"calls": calls, "strikes": strikes, "puts": puts})
-        
+
         if self.quote is not None:
             print(self.quote)
         else:
@@ -71,6 +71,7 @@ class MockBoard:
 
             answer = input()
             print(f"fair price = {fair:.2f}")
+
 
 if __name__ == "__main__":
     stockinfo = StockProperties()

@@ -26,7 +26,7 @@ class MarketMaker:
 
     def adjust_width(self):
         if self.width is None:
-            self.width = max(random.weibullvariate(0.2, 1.5), 0.02) # mean 0.155
+            self.width = max(random.weibullvariate(0.2, 1.5), 0.02)  # mean 0.155
             self.width = min(self.width, 0.4)
         else:
             self.width = (
