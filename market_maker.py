@@ -8,7 +8,6 @@ show some width in a higher fair
 Some customer orders are informed, and others aren't
 """
 
-import numpy as np
 from scipy.stats import norm
 import random
 from generate_stock import StockProperties

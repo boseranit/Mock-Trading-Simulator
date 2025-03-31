@@ -1,8 +1,22 @@
-import numpy as np
-from scipy.stats import norm
 import random
-import pandas as pd
 from generate_stock import StockProperties
+
+
+def print_options_board(calls, strikes, puts):
+    # Find the maximum width for each column
+    call_width = 5
+    strike_width = 7
+    put_width = 5
+
+    # Print the header
+    print(
+        f"{'calls':>{call_width}}  {'strikes':>{strike_width}}  {'puts':>{put_width}}"
+    )
+    # Print the rows
+    for call, strike, put in zip(calls, strikes, puts):
+        print(
+            f"{call:>{call_width}.2f}  {strike:^{strike_width}}  {put:>{put_width}.2f}"
+        )
 
 
 class MockBoard:
@@ -18,8 +32,6 @@ class MockBoard:
         rc = self.stockinfo.rc
         strikes = self.stockinfo.strikes
         calls, puts = self.stockinfo.get_options(stock)
-
-        board = pd.DataFrame({"calls": calls, "strikes": strikes, "puts": puts})
 
         if self.quote is not None:
             print(self.quote)
@@ -41,7 +53,7 @@ class MockBoard:
 
         print("Press enter to see answers...")
         input()
-        print(board.round(2).to_string(index=False))
+        print_options_board(calls, strikes, puts)
 
     def make_markets(self):
         stock = self.stock

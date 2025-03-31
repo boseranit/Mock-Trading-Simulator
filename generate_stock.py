@@ -1,7 +1,6 @@
 import numpy as np
 from scipy.stats import norm
 import random
-import pandas as pd
 
 
 def BS_CALL(S, K, T, r, q, sigma):
