@@ -66,9 +66,8 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            height: 30px;
-            font-size: 1.5em;
-            font-family: monospace;
+            height: 20px;
+            font-size: 1.3em;
             text-align: center;
             padding: 20px;
             margin: 0;
@@ -81,16 +80,17 @@
         <div id="print-quote" class="stock-quote">
             <!-- This will display trade info -->
         </div>
+		<div id="rc"></div>
         <table>
             <colgroup>
                 <col style="width: 150px;">  
-                <col style="width: auto;">  
-                <col style="width: auto;">
-                <col style="width: auto;">
-                <col style="width: 45px;">
-                <col style="width: auto;">
-                <col style="width: auto;">
-                <col style="width: auto;">
+                <col style="width: 50px;">  
+                <col style="width: 40px;">
+                <col style="width: 50px;">
+				<col style="width: 45px;"> <!-- strikes -->
+                <col style="width: 50px;">
+                <col style="width: 40px;">
+                <col style="width: 50px;">
                 <col style="width: 150px;">  
             </colgroup>
             <thead>
@@ -106,6 +106,7 @@
                 <!-- Options data will be inserted here -->
             </tbody>
         </table>
+		<button id="theosToggle" aria-pressed="false">Show theos</button> 
         <div id="output1"></div>
         <div id="output2"></div>
         <div id="print-board">

@@ -10,10 +10,11 @@ class MockBoard {
 		const rc = this.stockinfo.rc;
 		const strikes = this.stockinfo.strikes;
 		const [calls, puts] = this.stockinfo.get_options(stock);
+		this.calls = calls;
+		this.puts = puts;
 
 		const output1 = document.getElementById("output1");
 		const tbody = document.getElementById('optionsTable');
-		output1.innerHTML = this.quote ? this.quote : `S = ${stock.toFixed(2)}<br>r/c = ${rc}`;
 
 		let bw = `${strikes[0]} B/W=${(puts[0] + rc).toFixed(2)}`;
 		let ps = `${strikes[1]}/${strikes[2]} PS=${(puts[2] - puts[1]).toFixed(2)}`;
@@ -35,6 +36,30 @@ class MockBoard {
 			});
 			tbody.appendChild(row);
 		});
+	}
+
+	show_theos() {
+		const tbody = document.getElementById('optionsTable');
+		const rows = tbody.rows;
+		for (let i = 0; i < 5; i++) {
+			const row = rows[i];
+			const callcell = row.cells[2];
+			const putcell = row.cells[6];
+			callcell.textContent = this.calls[i].toFixed(2);
+			putcell.textContent = this.puts[i].toFixed(2);
+		}
+	}
+
+	hide_theos() {
+		const tbody = document.getElementById('optionsTable');
+		const rows = tbody.rows;
+		for (let i = 0; i < 5; i++) {
+			const row = rows[i];
+			const callcell = row.cells[2];
+			const putcell = row.cells[6];
+			callcell.textContent = "";
+			putcell.textContent = "";
+		}
 	}
 
 	make_markets() {
