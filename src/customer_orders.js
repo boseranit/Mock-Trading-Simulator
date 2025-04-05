@@ -93,36 +93,104 @@ class CustomerOrders {
         } else {
             const [side, strikeStr, ins] = action.split(" ", 3);
             const strike = Math.round(parseFloat(this.getDigitsPrefix(strikeStr)), 1);
-            const sideText = side === "buy" ? "offer" : "bid";
-            const s = sideText === "offer" ? -1 : 1;
-            const custText = `${this.stockinfo.insToText(ins, strike)} ${sideText}`;
+            const s = side === "buy" ? -1 : 1;
 
             const key = [ins, strike, s].toString();
-            if (this.orders[key]) {
-                const [price, size] = this.orders[key];
-                document.getElementById("responseText").textContent = `Traded ${size}x ${custText} at ${price}`;
-                delete this.orders[key];
-            } else {
-				document.getElementById("responseText").textContent = `${custText} not found`;
-                console.log(this.orders);
-            }
+			this.fillOrder(key);
+            
         }
     }
 
-	addRestingOrder(ins, strike, side, price, size) {
-		if (Object.keys(this.orders).length > 0) {
-            printArea.innerHTML = "Resting orders:\n";
-            for (const key in this.orders) {
-                const [ins, strike, side] = key.split(",");
-                const [price, size] = this.orders[key];
-                const sideText = side === "1" ? "bid" : "offer";
-                printArea.innerHTML += `${this.stockinfo.insToText(ins, strike)} ${size}x ${sideText} ${price.toFixed(2)}\n`;
-            }
-            printArea.innerHTML += "\n";
-        }
-		return;
+	addRestingOrder(ins, strike, s, price, size) {
+		const key = [ins, strike, s].toString();
+        const side = s === 1 ? "bid" : "offer";
+		if (this.orders.get(key)) {
+			const [oldPrice, _] = this.orders.get(key);
+			this.orders.set(key , [Math.max(s * oldPrice, s * price), size]);
+			// mark the trade as cancelled
+		} else {
+			this.orders.set(key, [price, size]);
+		}
+
+		// Create text description for display
+		const instext = this.stockinfo.insToText(ins, strike);
+		
+		// Create the new list item element
+		const li = document.createElement('li');
+		const span = document.createElement('span');
+		span.className = 'item-text';
+		span.textContent = `${instext} ${size}x cust ${side}s ${price.toFixed(2)}\n`;
+		
+		// Create and set up the button
+		const button = document.createElement('button');
+		button.className = 'item-button';
+		button.textContent = s==1 ? 'Sell' : 'Buy';
+		button.onclick = (event) => {
+		  // Navigate up from the button to the parent li element
+		  const listItem = event.target.closest('li');
+		  
+		  // Get the orderKey from the li's dataset
+		  const key = listItem.dataset.orderKey;
+		  
+		  this.fillOrder(key);
+		};	
+		// Store the key as a data attribute for easy access when removing
+		li.dataset.orderKey = key;
+		
+		// Append the elements to the list item
+		li.appendChild(span);
+		li.appendChild(button);
+		
+		// Add the new list item to the itemsList
+		document.getElementById('restingOrders').appendChild(li);
+		
+		return li;
 	}
 
+	// Function to remove item from resting orders list and the Map
+	fillOrder(key) {
+		// Remove from the orders Map
+		if (this.orders.has(key)) {
+			const [price, size] = this.orders.get(key);
+			this.orders.delete(key);
+            document.getElementById("responseText").textContent = `Traded ${size}x ${key} at ${price}`;
+		} else {
+			document.getElementById("responseText").textContent = `${key} not found`;
+			console.log(this.orders);
+		}
+		// Find the matching list item using the data attribute
+		const itemsList = document.getElementById('restingOrders');
+		const items = itemsList.querySelectorAll('li');
+		
+		for (const item of items) {
+			if (item.dataset.orderKey === key) {
+				// itemsList.removeChild(item);
+			}
+		}
+		
+		// identify button based on the key and update button
+		const listItem = document.querySelector(`li[data-order-key="${key}"]`);
+		if (!listItem) {
+			console.error(`No list item found with key: ${key}`);
+			return;
+		}
+		
+		// Find the text element and button within this list item
+		const textElement = listItem.querySelector('.item-text');
+		const button = listItem.querySelector('.item-button');	
+		
+		// Toggle button color
+		button.classList.toggle('active');
+		
+		if (button.classList.contains('active')) {
+			//textElement.textContent = textElement.textContent + " T";
+			button.textContent = "Traded";
+		} 
+		return; 
+	}
+
+		
+		
 	processQuote(quote) {
 		const [ins, strike, size] = this.selected_ins;
     	let stockquote = null;
@@ -171,13 +239,8 @@ class CustomerOrders {
             printArea.innerHTML = `Cust sells at ${quote[0]}\n`;
         } else {
             printArea.innerHTML = `${instext} ${size}x cust ${side}s ${price.toFixed(2)}\n`;
-            const key = [ins, strike, s].toString();
-            if (this.orders[key]) {
-                const [oldPrice, _] = this.orders[key];
-                this.orders[key] = [Math.max(s * oldPrice, s * price), size];
-            } else {
-                this.orders[key] = [price, size];
-            }
+			this.addRestingOrder(ins, strike, s, price, size)
+            
         }
 		// update resting orders table
 		this.state = "new ins";
