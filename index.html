@@ -131,19 +131,25 @@
             border: 1px solid #ddd;
             border-radius: 4px;
         }
-        .next-step-button {
+        .next-button {
             background-color: #ff9800;
             color: white;
             border: none;
-            padding: 10px 20px;
+            padding: 10px 15px;
             text-align: center;
             border-radius: 4px;
             cursor: pointer;
             transition: background-color 0.3s;
         }
         
-        .next-step-button:hover {
+        .next-button:hover {
             background-color: #f57c00;
+        }
+		.response-container {
+            padding: 10px;
+            background-color: #f5f5f5;
+            border-radius: 4px;
+            min-height: 20px;
         }
     </style>
 </head>
@@ -212,10 +218,13 @@
 			<!-- Right Panel -->
 			<div class="right-panel">
 				<div class="prompt-container">
-					<label for="user-input">Enter your text:</label>
+					<label for="user-input" id="prompt">Click next step</label>
 					<input type="text" id="user-input" placeholder="Type here and press Enter">
 				</div>
-				<button class="next-step-button" onclick="nextStep()">Next Step</button>
+				<button class="next-button" id="next-step-button">Next Step</button>
+				<div class="response-container">
+					<p id="responseText"></p>
+				</div>
 			</div>
     	</div>
     </div>

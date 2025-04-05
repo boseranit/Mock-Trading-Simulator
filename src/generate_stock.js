@@ -91,7 +91,7 @@ class StockProperties {
   }
   
   // Convert from instrument price to stock price
-  ins_to_stock(price, ins, strike1 = null) {
+  insToStock(price, ins, strike1 = null) {
 	if (ins === "call") {
 	  return price + this.strikes[0] - this.bw;
 	} else if (ins === "put") {
@@ -99,7 +99,7 @@ class StockProperties {
 	} else if (ins === "combo") {
 	  return price - this.rc + strike1;
 	} else if (ins === "p.o. combo") {
-	  return this.ins_to_stock(-price, "combo", strike1);
+	  return this.insToStock(-price, "combo", strike1);
 	}
 	return price; // Default fallback
   }

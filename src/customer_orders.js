@@ -2,9 +2,10 @@ class CustomerOrders {
     constructor(stockinfo, mm) {
         this.stockinfo = stockinfo;
         this.mm = mm;
-        this.orders = {};  // (ins, strike, side) : (price, size)
+        this.orders = new Map();  // (ins, strike, side) : (price, size)
         this.P = 0.5;  // probability of informed customer
         this.Pmarket = 0.6;  // probability of making market before customer order
+		this.state = "new ins" // "quote pending", "new ins"
     }
 
     getDigitsPrefix(text) {
@@ -30,7 +31,7 @@ class CustomerOrders {
 
 	  const secondBestBid = buyPrices[1] ?? 0;   
   	  const secondBestAsk = sellPrices[1] ?? 1e6; 
-	  return { secondBestBid, secondBestAsk };
+	  return [ secondBestBid, secondBestAsk ];
 	}
 
     generateOrder(quote = null) {
@@ -39,13 +40,12 @@ class CustomerOrders {
         let fair = this.stockinfo.stock;
 
         if (!informed) {
-            fair = Math.random() * (this.mm.mid + this.mm.width) - this.mm.width;
+            fair = randomNormal(this.mm.mid, this.mm.width);
         }
+		document.getElementById("responseText").textContent += `fair = ${fair}, edge = ${edge}`
 
         let bid = this.mm.bid, ask = this.mm.offer;
-        if (quote !== null) {
-            [bid, ask] = quote;
-        }
+		quote = quote ?? [bid, ask];
 
         let side = Math.random() < 0.5 ? -1 : 1;
         let price = null;
@@ -63,9 +63,9 @@ class CustomerOrders {
         return [side, price];
     }
 
-	generateGoodOrder(self, quote = null) {
+	generateGoodOrder(quote = null) {
 		// ensures that generated order beats second best bid or ask
-		const {bb, bo} = this.getSecondBestBidAsk(quote);
+		const [bb, bo] = this.getSecondBestBidAsk();
 		let side = 1, price = -1;
 		while ((side === 1 && price < bb) || (side === -1 && price > bo)) {
 			[side, price] = this.generateOrder(quote);
@@ -74,10 +74,15 @@ class CustomerOrders {
 	}
 
     parseAction(action) {
-        if (action.includes("done")) {
+        if (action === "") {
             this.nextStep();
             return;
         }
+		if (this.state === "market pending") {
+			const [bid, ask] = action.split(" ").map(parseFloat);
+			this.processQuote([bid, ask]);
+			return;
+		}
 
         if (action.endsWith("k")) {
             const [side, priceStr, sizeStr] = action.split(" ");
@@ -95,19 +100,17 @@ class CustomerOrders {
             const key = [ins, strike, s].toString();
             if (this.orders[key]) {
                 const [price, size] = this.orders[key];
-                document.getElementById("print-quote").innerText = `Traded ${size}x ${custText} at ${price}`;
+                document.getElementById("responseText").textContent = `Traded ${size}x ${custText} at ${price}`;
                 delete this.orders[key];
             } else {
-                document.getElementById("print-quote").innerText = `${custText} not found`;
+				document.getElementById("responseText").textContent = `${custText} not found`;
                 console.log(this.orders);
             }
         }
     }
 
-    nextStep() {
-        const printArea = document.getElementById("print-board");
-
-        if (Object.keys(this.orders).length > 0) {
+	addRestingOrder(ins, strike, side, price, size) {
+		if (Object.keys(this.orders).length > 0) {
             printArea.innerHTML = "Resting orders:\n";
             for (const key in this.orders) {
                 const [ins, strike, side] = key.split(",");
@@ -117,33 +120,57 @@ class CustomerOrders {
             }
             printArea.innerHTML += "\n";
         }
+		return;
+	}
 
-        const [ins, strike] = this.stockinfo.choose_ins(this.mm.mid);
-        const size = this.mm.DEFAULT_SZ * Math.floor(Math.random() * 13 + 1);
-        const instext = this.stockinfo.insToText(ins, strike);
-        let quote = null;
-        let stockquote = null;
+	processQuote(quote) {
+		const [ins, strike, size] = this.selected_ins;
+    	let stockquote = null;
+		stockquote = quote.map(p => this.stockinfo.insToStock(p, ins, strike));
+        stockquote = stockquote.sort();
+        document.getElementById("responseText").textContent = `implied stock ${stockquote}`;  // TODO: remove after testing
 
-        if (Math.random() < this.Pmarket) {
-            printArea.innerHTML += `Make a market in ${instext} ${size}x\n`;
-            quote = prompt("Enter quote for market (bid offer):").split(" ").map(parseFloat);
-            stockquote = quote.map(p => this.stockinfo.insToStock(p, ins, strike));
-            stockquote = stockquote.sort();
-            printArea.innerHTML += `implied stock ${stockquote}\n`;  // TODO: remove after testing
-        }
+		this.state = "new order";
+		this.nextStep(quote, stockquote);
+	}
 
+    nextStep(quote=null, stockquote=null) {
+        const printArea = document.getElementById("prompt");
+        const responseArea = document.getElementById("responseText");
+
+		if (this.state === "market pending") {
+			responseArea.textContent = "enter your market";
+			return;
+		}
+		
+		if (this.state === "new ins") {
+			const [ins, strike] = this.stockinfo.choose_ins(this.mm.mid);
+			const size = this.mm.DEFAULT_SZ * Math.floor(Math.random() * 13 + 1);
+			const instext = this.stockinfo.insToText(ins, strike);
+			this.selected_ins = [ins, strike, size]
+
+			if (Math.random() < this.Pmarket) {
+				printArea.innerHTML = `Make a market in ${instext} ${size}x\n`;
+				this.state = "market pending";
+				return;
+			}
+		}
+        // state here is "new order" either with or without quote
+
+		const [ins, strike, size] = this.selected_ins;
+		const instext = this.stockinfo.insToText(ins, strike);
         let [s, price] = this.generateGoodOrder(stockquote);
-        printArea.innerHTML += `(stock ${s} ${price}`;
+        responseArea.textContent += `(stock ${s} ${price})\n`;
         [s, price] = this.stockinfo.stockToIns(s, price, ins, strike);
-        printArea.innerHTML += `${instext} ${s} ${price})\n`;
+        responseArea.textContent += `${instext} ${s} ${price})\n`;
 
         const side = s === 1 ? "bid" : "offer";
         if (quote !== null && side === "bid" && price >= quote[1]) {
-            printArea.innerHTML += `Cust buys at ${quote[1]}\n`;
+            printArea.innerHTML = `Cust buys at ${quote[1]}\n`;
         } else if (quote !== null && side === "offer" && price <= quote[0]) {
-            printArea.innerHTML += `Cust sells at ${quote[0]}\n`;
+            printArea.innerHTML = `Cust sells at ${quote[0]}\n`;
         } else {
-            printArea.innerHTML += `${instext} ${size}x cust ${side}s ${price.toFixed(2)}\n`;
+            printArea.innerHTML = `${instext} ${size}x cust ${side}s ${price.toFixed(2)}\n`;
             const key = [ins, strike, s].toString();
             if (this.orders[key]) {
                 const [oldPrice, _] = this.orders[key];
@@ -152,6 +179,8 @@ class CustomerOrders {
                 this.orders[key] = [price, size];
             }
         }
+		// update resting orders table
+		this.state = "new ins";
     }
 
     start() {

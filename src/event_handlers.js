@@ -92,17 +92,20 @@ document.addEventListener('DOMContentLoaded', function() {
 		  pricesCurrentlyVisible = true; // Update state variable
 		}
 	});
+
     const userInputField = document.getElementById("user-input");
     userInputField.addEventListener("keydown", (event) => {
         if (event.key === "Enter") {
             const action = userInputField.value;
-            if (action.includes("quit")) {
-                return;
-            }
             cust.parseAction(action);
             userInputField.value = "";
         }
     });	
+
+	const nextStepButton = document.getElementById("next-step-button");
+	nextStepButton.addEventListener('click', () => {
+		cust.nextStep();
+	});
 
 	// Generate new stock button
 	document.getElementById('generateNew').addEventListener('click', function() {
