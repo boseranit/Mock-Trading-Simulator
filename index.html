@@ -44,23 +44,12 @@
         button:hover {
             background-color: #45a049;
         }
-        input {
-            padding: 8px;
-            margin: 5px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-        }
+        
         .info-section {
             margin-top: 20px;
             background-color: #e9f7ef;
             padding: 15px;
             border-radius: 8px;
-        }
-        #output1, #output2 {
-            padding: 10px;
-            margin: 10px;
-            border: 1px solid black;
-            min-height: 100px;
         }
         .stock-quote {
             display: flex;
@@ -72,7 +61,90 @@
             padding: 20px;
             margin: 0;
         }
+		.custOrders {
+            display: flex;
+            max-width: 1200px;
+            margin: 0 auto;
+            gap: 20px;
+        }
 
+		.left-panel, .right-panel {
+            flex: 1;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+        }
+        
+        h2 {
+            margin-top: 0;
+            color: #333;
+        }
+        
+        ul {
+            list-style-type: none;
+            padding: 0;
+        }
+        
+        li {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 2px 0;
+            border-bottom: 1px dotted #eee;
+        }
+        
+        .item-button {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            text-align: center;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        
+        .item-button.active {
+            background-color: #2196F3;
+        }
+        
+        .prompt-container {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+        
+        input[type="text"] {
+            width: 80%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            margin-bottom: 20px;
+        }
+        input {
+            padding: 8px;
+            margin: 5px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        .next-step-button {
+            background-color: #ff9800;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            text-align: center;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        
+        .next-step-button:hover {
+            background-color: #f57c00;
+        }
     </style>
 </head>
 <body>
@@ -106,43 +178,46 @@
                 <!-- Options data will be inserted here -->
             </tbody>
         </table>
-		<button id="theosToggle" aria-pressed="false">Show theos</button> 
-        <div id="output1"></div>
-        <div id="output2"></div>
-        <div id="print-board">
-        <!-- This will display the print statements related to the options board -->
-        </div>
+        
         
         
     
-        <input type="text" id="user-input" placeholder="Your answer" style="margin-top: 20px;">
-        <h1>Options Calculator</h1>
-        
         <div class="controls">
+			<button id="theosToggle" aria-pressed="false">Show theos</button> 
             <button id="generateNew">Generate New Stock</button>
-            <button id="randomWalk">Random Stock Movement</button>
             <input type="number" id="stockPrice" placeholder="Enter stock price">
             <button id="updatePrice">Update Price</button>
         </div>
         
-        <div class="info-section">
-            <h2>Stock Information</h2>
-            <p>Stock Price: <span id="currentPrice"></span></p>
-            <p>Risk-Free Rate: <span id="riskFreeRate"></span>%</p>
-            <p>Dividend Yield: <span id="dividendYield"></span>%</p>
-            <p>Days to Expiration: <span id="daysToExpiration"></span></p>
-            <p>Volatility: <span id="volatility"></span>%</p>
-        </div>
-        
-        
-        
-        <div class="info-section">
-            <h2>Instrument Selection</h2>
-            <button id="chooseInstrument">Choose Random Instrument</button>
-            <p>Selected Instrument: <span id="selectedInstrument"></span></p>
-            <p>Description: <span id="instrumentDescription"></span></p>
-            <p>Price: <span id="instrumentPrice"></span></p>
-        </div>
+		<div class="custOrders">
+			<!-- Left Panel -->
+			<div class="left-panel">
+				<h2>Cust Orders</h2>
+				<ul id="itemsList">
+					<li>
+						<span class="item-text">Item 1 description</span>
+						<button class="item-button" onclick="updateItem(this)">Update</button>
+					</li>
+					<li>
+						<span class="item-text">Item 2 description</span>
+						<button class="item-button" onclick="updateItem(this)">Update</button>
+					</li>
+					<li>
+						<span class="item-text">Item 3 description</span>
+						<button class="item-button" onclick="updateItem(this)">Update</button>
+					</li>
+				</ul>
+			</div>
+			
+			<!-- Right Panel -->
+			<div class="right-panel">
+				<div class="prompt-container">
+					<label for="user-input">Enter your text:</label>
+					<input type="text" id="user-input" placeholder="Type here and press Enter">
+				</div>
+				<button class="next-step-button" onclick="nextStep()">Next Step</button>
+			</div>
+    	</div>
     </div>
 
     <script src="src/randomUtils.js"></script>

@@ -15,7 +15,7 @@ class MockBoard {
 
 		const output1 = document.getElementById("output1");
 		const tbody = document.getElementById('optionsTable');
-
+		tbody.innerHTML = '';
 		let bw = `${strikes[0]} B/W=${(puts[0] + rc).toFixed(2)}`;
 		let ps = `${strikes[1]}/${strikes[2]} PS=${(puts[2] - puts[1]).toFixed(2)}`;
 		let strad = `${strikes[2]} ∀=${(calls[2] + puts[2]).toFixed(2)}`;
