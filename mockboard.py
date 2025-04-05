@@ -37,7 +37,7 @@ class MockBoard:
             print(self.quote)
         else:
             print(f"S = {stock:.2f}")
-        print("r/c =", rc)
+        print(f"r/c = {rc:.2f}")
 
         bw = f"{strikes[0]} B/W={puts[0] + rc:.2f}"
         ps = f"{strikes[1]}/{strikes[2]} PS={puts[2] - puts[1]:.2f}"

@@ -16,7 +16,24 @@ class CustomerOrders:
         self.mm = mm
         self.orders = dict()  # (ins, strike, side) : (price, size)
         self.P = 0.5  # probability of informed customer
-        self.Pmarket = 0.5  # probability of making market before cust order
+        self.Pmarket = 0.6  # probability of making market before cust order
+
+    def best_bid_ask(self):
+        # get second best bid and ask in resting orders
+        buy_prices = [value[0] for key, value in self.orders.items() if key[2] == 1]
+        sell_prices = [value[0] for key, value in self.orders.items() if key[2] == -1]
+
+        second_highest_buy = 0
+        if len(buy_prices) >= 2:
+            buy_prices.sort(reverse=True) # Sort descending for highest
+            second_highest_buy = buy_prices[1]
+
+        second_lowest_sell = 1e6
+        if len(sell_prices) >= 2:
+            sell_prices.sort() # Sort ascending for lowest
+            second_lowest_sell = sell_prices[1]
+
+        return second_highest_buy, second_lowest_sell
 
     def generate_order(self, quote=None):
         informed = random.random() < self.P
@@ -50,6 +67,15 @@ class CustomerOrders:
             side = -1
             price = random.uniform(bid - self.mm.edge, bid - 0.01)
 
+        return side, price
+
+    def generate_good_order(self, quote=None):
+        # ensures that generated order beats second best bid or ask
+        bb, bo = self.best_bid_ask()
+        side = 1
+        price = -1
+        while (side == 1 and price < bb) or (side == -1 and price > bo):
+            side, price = self.generate_order(quote)
         return side, price
 
     def parse_action(self, action):
@@ -111,7 +137,7 @@ class CustomerOrders:
             stockquote = tuple(sorted(stockquote))
             print("implied stock", stockquote)  # TODO: remove after testing
 
-        s, price = self.generate_order(stockquote)
+        s, price = self.generate_good_order(stockquote)
         print(f"(stock {s} {price}", end="")
         s, price = self.stockinfo.stock_to_ins(s, price, ins, strike)
         print(f"{instext} {s} {price})")  # TODO: remove after testing

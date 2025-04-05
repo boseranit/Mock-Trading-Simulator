@@ -4,7 +4,7 @@ class CustomerOrders {
         this.mm = mm;
         this.orders = {};  // (ins, strike, side) : (price, size)
         this.P = 0.5;  // probability of informed customer
-        this.Pmarket = 0.5;  // probability of making market before customer order
+        this.Pmarket = 0.6;  // probability of making market before customer order
     }
 
     getDigitsPrefix(text) {
@@ -12,9 +12,30 @@ class CustomerOrders {
         return match ? match[0] : '';
     }
 
+	getSecondBestBidAsk() {
+	  const buyPrices = [];
+	  const sellPrices = [];
+
+	  for (const [key, value] of this.orders) {
+		// side = key[2], price = value[0]
+		if (key[2] === 1) {
+		  buyPrices.push(value[0]);
+		} else if (key[2] === -1) {
+		  sellPrices.push(value[0]);
+		}
+	  }
+
+	  buyPrices.sort((a, b) => b - a); // Highest first
+	  sellPrices.sort((a, b) => a - b); // Lowest first
+
+	  const secondBestBid = buyPrices[1] ?? 0;   
+  	  const secondBestAsk = sellPrices[1] ?? 1e6; 
+	  return { secondBestBid, secondBestAsk };
+	}
+
     generateOrder(quote = null) {
         const informed = Math.random() < this.P;
-        const edge = Math.random() * 80;  // mean 1/80
+        const edge = randomExpo(80);  // mean 1/80
         let fair = this.stockinfo.stock;
 
         if (!informed) {
@@ -41,6 +62,16 @@ class CustomerOrders {
 
         return [side, price];
     }
+
+	generateGoodOrder(self, quote = null) {
+		// ensures that generated order beats second best bid or ask
+		const {bb, bo} = this.getSecondBestBidAsk(quote);
+		let side = 1, price = -1;
+		while ((side === 1 && price < bb) || (side === -1 && price > bo)) {
+			[side, price] = this.generateOrder(quote);
+		}
+		return [side, price]
+	}
 
     parseAction(action) {
         if (action.includes("done")) {
@@ -101,7 +132,7 @@ class CustomerOrders {
             printArea.innerHTML += `implied stock ${stockquote}\n`;  // TODO: remove after testing
         }
 
-        let [s, price] = this.generateOrder(stockquote);
+        let [s, price] = this.generateGoodOrder(stockquote);
         printArea.innerHTML += `(stock ${s} ${price}`;
         [s, price] = this.stockinfo.stockToIns(s, price, ins, strike);
         printArea.innerHTML += `${instext} ${s} ${price})\n`;

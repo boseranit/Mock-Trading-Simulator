@@ -17,20 +17,19 @@ class MarketMaker:
     def __init__(self, stockinfo):
         self.stockinfo = stockinfo
         self.CONV_WIDTH = random.triangular(0.02, 0.30, 0.10)
-        self.alpha = 0.2  # weighting of new parameters
         self.mid = None
         self.width = None
         self.DEFAULT_SZ = random.randrange(30, 101, 10)
         self.adjust_width()
 
-    def adjust_width(self):
+    def adjust_width(self, alpha=0.2):
         if self.width is None:
             self.width = max(random.weibullvariate(0.2, 1.5), 0.02)  # mean 0.155
             self.width = min(self.width, 0.4)
         else:
             self.width = (
-                self.alpha * random.triangular(0.02, 2 * self.CONV_WIDTH - 0.02)
-                + (1 - self.alpha) * self.width
+                alpha * random.triangular(0.02, 2 * self.CONV_WIDTH - 0.02)
+                + (1 - alpha) * self.width
             )
         self.edge = self.width / 2
         newprice = self.stockinfo.stock + random.gauss(0, 2 * self.edge)
@@ -41,7 +40,7 @@ class MarketMaker:
                 3 * self.edge, self.edge
             )
         else:
-            self.mid = self.alpha * newprice + (1 - self.alpha) * self.mid
+            self.mid = alpha * newprice + (1 - alpha) * self.mid
             self.mid = max(self.mid, oldprice - self.edge)
             self.mid = min(self.mid, oldprice + self.edge)
         self.impact = self.width * 10
@@ -73,7 +72,7 @@ class MarketMaker:
 
         # add in some random movement
         old_fair = self.mid
-        uptick = self.adjust_width()
+        uptick = self.adjust_width(rel_size / 15)
         # mid price cannot move in opposite direction to trade
         if side == "buy" and price > old_fair:
             self.mid = max(old_fair, self.mid)

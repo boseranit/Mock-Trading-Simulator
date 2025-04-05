@@ -12,7 +12,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
 	function updateStock() {
 		printArea.textContent = mm.quote();
-		rc.textContent = `r/c = ${stockProps.rc}`;
+		rc.textContent = `r/c = ${stockProps.rc.toFixed(2)}`;
 	};
 
 	updateStock();

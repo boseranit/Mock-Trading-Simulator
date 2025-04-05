@@ -1,8 +1,4 @@
 // Include the StockProperties class code here
-function normCDF(x, mean = 0, stddev = 1) {
-  return jStat.normal.cdf(x, mean, stddev);
-}
-
 // Black-Scholes formula for call options
 function BS_CALL(S, K, T, r, q, sigma) {
   const d1 = (Math.log(S / K) + (r - q + sigma**2 / 2) * T) / (sigma * Math.sqrt(T));
@@ -75,11 +71,7 @@ class StockProperties {
   
   // Simulate stock price change
   random_walk() {
-	// Box-Muller transform for normal distribution
-	const u1 = Math.random();
-	const u2 = Math.random();
-	const logret = Math.sqrt(-2.0 * Math.log(u1)) * Math.cos(2.0 * Math.PI * u2) * this.sigma;
-	
+	const logret = randomNormal(0, self.sigma)
 	this.stock = this.stock * Math.exp(logret);
 	return Math.round(this.stock * 100) / 100;
   }
