@@ -25,8 +25,8 @@ class StockProperties:
             self.strikes.append(self.strikes[-1] + self.STRIKE_INC)
         self.stock = self.strikes[2] + round(random.uniform(-3, 5), 2)
 
-        self.r = random.uniform(0.03, 0.06)
         self.div = random.uniform(0, 0.03)
+        self.r = random.uniform(self.div, self.div+0.03)
         self.tte = random.uniform(8, 50) / 365
         # use smallest strike rc to avoid negative puts
         self.rc = self.strikes[0] * (1 - np.exp(-self.r * self.tte)) - self.stock * (
@@ -51,7 +51,7 @@ class StockProperties:
         return self.calls, self.puts
 
     def random_walk(self):
-        logret = random.gauss(0, self.sigma)
+        logret = random.gauss(0, self.sigma/64)
         self.stock = self.stock * np.exp(logret)
 
     def stock_to_ins(self, side, price, ins, strike1=None):

@@ -33,8 +33,8 @@ class StockProperties {
 	this.stock = this.strikes[2] + Math.round((Math.random() * 8 - 3) * 100) / 100;
 	
 	// Interest rate and dividend yield
-	this.r = Math.random() * 0.03 + 0.03;
 	this.div = Math.random() * 0.03;
+	this.r = Math.random() * 0.03 + this.div;
 	
 	// Time to expiration in years
 	this.tte = (Math.random() * 42 + 8) / 365;
@@ -71,7 +71,7 @@ class StockProperties {
   
   // Simulate stock price change
   random_walk() {
-	const logret = randomNormal(0, self.sigma)
+	const logret = randomNormal(0, self.sigma/64)
 	this.stock = this.stock * Math.exp(logret);
 	return Math.round(this.stock * 100) / 100;
   }
