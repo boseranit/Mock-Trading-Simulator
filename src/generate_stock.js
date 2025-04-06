@@ -34,7 +34,7 @@ class StockProperties {
 	
 	// Interest rate and dividend yield
 	this.div = Math.random() * 0.03;
-	this.r = Math.random() * 0.03 + this.div;
+	this.r = Math.random() * 0.03 + this.div + 0.006;
 	
 	// Time to expiration in years
 	this.tte = (Math.random() * 42 + 8) / 365;

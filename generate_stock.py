@@ -26,7 +26,7 @@ class StockProperties:
         self.stock = self.strikes[2] + round(random.uniform(-3, 5), 2)
 
         self.div = random.uniform(0, 0.03)
-        self.r = random.uniform(self.div, self.div+0.03)
+        self.r = random.uniform(self.div+0.006, self.div+0.03)
         self.tte = random.uniform(8, 50) / 365
         # use smallest strike rc to avoid negative puts
         self.rc = self.strikes[0] * (1 - np.exp(-self.r * self.tte)) - self.stock * (
