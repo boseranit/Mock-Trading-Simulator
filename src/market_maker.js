@@ -42,10 +42,10 @@ class MarketMaker {
 	}
 
 	trade(side, price, size) {
-		const printArea = document.getElementById("print-quote");
+		const printArea = document.getElementById("responseText");
 
 		// print the trade information
-		printArea.innerHTML = `side: ${side}  price: ${price}  size: ${size}`;
+		printArea.textContent = `side: ${side}  price: ${price}  size: ${size}`;
 
 		const relSize = size / this.DEFAULT_SZ;
 		const alpha = normCDF(relSize, 3, 1.5);
@@ -74,6 +74,8 @@ class MarketMaker {
 			if (side === "buy" && rng < 0.5) o = 2;
 		}
 
-		return this.quote(b, o);
+		const newquote = this.quote(b, o)
+        document.getElementById("print-quote").innerText = newquote;
+		return newquote;
 	}
 }

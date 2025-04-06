@@ -17,17 +17,6 @@ document.addEventListener('DOMContentLoaded', function() {
 	updateStock();
 	
 	const table = document.getElementById('optionsTable');
-	// Make only bid and ask columns editable 
-    table.querySelectorAll('td').forEach((td, index) => {
-        const colIndex = index % 9;
-        if (colIndex === 1 || colIndex === 3 || colIndex === 5 || colIndex === 7) { 
-            td.setAttribute('contenteditable', 'true');
-            td.setAttribute('tabindex', '0');
-        } else {
-            td.setAttribute('contenteditable', 'false');
-            td.setAttribute('tabindex', '-1');
-        }
-    });
 	// Add tab navigation logic
 	table.addEventListener('keydown', (e) => {
 		if (e.key === 'Tab' && !e.shiftKey) {
@@ -117,7 +106,34 @@ document.addEventListener('DOMContentLoaded', function() {
 		updateStock();
 
 	});
-	
-	
-	
+
+	const priceInput = document.getElementById('price-input');
+	const sizeInput = document.getElementById('size-input');
+	const buyButton = document.getElementById('buy-button');
+	const sellButton = document.getElementById('sell-button');
+
+	sellButton.addEventListener('click', function() {
+		const price = parseFloat(priceInput.value);
+		const size = parseInt(sizeInput.value) / 100;
+		
+		// Validate inputs
+		if (isNaN(price) || isNaN(size) || price <= 0 || size <= 0) {
+			alert('Please enter valid price and size values');
+			return;
+		}
+		
+		mm.trade('sell', price, size);
+	});
+	buyButton.addEventListener('click', function() {
+		const price = parseFloat(priceInput.value);
+		const size = parseInt(sizeInput.value) / 100;
+		
+		// Validate inputs
+		if (isNaN(price) || isNaN(size) || price <= 0 || size <= 0) {
+			alert('Please enter valid price and size values');
+			return;
+		}
+		
+		mm.trade('buy', price, size);
+	});
 });

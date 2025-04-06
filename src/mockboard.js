@@ -36,6 +36,19 @@ class MockBoard {
 			});
 			tbody.appendChild(row);
 		});
+
+		// Make only bid and ask columns editable 
+		tbody.querySelectorAll('td').forEach((td, index) => {
+			const colIndex = index % 9;
+			if (colIndex === 1 || colIndex === 3 || colIndex === 5 || colIndex === 7) { 
+				td.setAttribute('contenteditable', 'true');
+				td.setAttribute('tabindex', '0');
+			} else {
+				td.setAttribute('contenteditable', 'false');
+				td.setAttribute('tabindex', '-1');
+			}
+		});
+
 	}
 
 	show_theos() {
