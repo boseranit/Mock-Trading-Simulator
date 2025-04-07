@@ -2,6 +2,9 @@ function normCDF(x, mean = 0, stddev = 1) {
   return jStat.normal.cdf(x, mean, stddev);
 }
 
+function randomUniform(low = 0, high = 1) {
+	return Math.random() * (high - low) + low;
+}
 
 function randomTriangular(low = 0, high = 1, mode) {
   const finalMode = (mode === undefined || mode === null) ? (low + high) / 2 : mode;

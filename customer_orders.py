@@ -53,7 +53,7 @@ class CustomerOrders:
             fair = random.gauss(self.mm.mid, self.mm.width)
 
         bid, ask = self.mm.bid, self.mm.offer
-        if quote is None:
+        if quote is not None:
             bid, ask = quote
 
         side = random.choice([-1, 1])

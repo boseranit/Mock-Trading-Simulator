@@ -42,10 +42,12 @@ class CustomerOrders {
         if (!informed) {
             fair = randomNormal(this.mm.mid, this.mm.width);
         }
-		document.getElementById("responseText").textContent += `fair = ${fair}, edge = ${edge}`
+		document.getElementById("responseText").textContent += `fair = ${fair}, edge = ${edge}`;
 
         let bid = this.mm.bid, ask = this.mm.offer;
-		quote = quote ?? [bid, ask];
+		if (quote !== null) { // prefer user market
+            [bid, ask] = quote;
+        }
 
         let side = Math.random() < 0.5 ? -1 : 1;
         let price = null;
@@ -54,10 +56,10 @@ class CustomerOrders {
             price = fair - side * edge;
         } else if (fair > ask) {
             side = 1;
-            price = Math.random() * (ask + this.mm.edge - ask) + (ask + 0.01);
+            price = randomUniform(ask + 0.01, ask + this.mm.edge);
         } else if (fair < bid) {
             side = -1;
-            price = Math.random() * (bid - this.mm.edge - bid) + (bid - 0.01);
+            price = randomUniform(bid - this.mm.edge, bid - 0.01);
         }
 
         return [side, price];
