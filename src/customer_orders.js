@@ -2,7 +2,7 @@ class CustomerOrders {
     constructor(stockinfo, mm) {
         this.stockinfo = stockinfo;
         this.mm = mm;
-        this.orders = new Map();  // (ins, strike, side) : (price, size)
+        this.orders = new Set();  // (ins, strike, side, price, size) 
         this.P = 0.5;  // probability of informed customer
         this.Pmarket = 0.6;  // probability of making market before customer order
 		this.state = "new ins" // "quote pending", "new ins"
@@ -69,7 +69,7 @@ class CustomerOrders {
 		// ensures that generated order beats second best bid or ask
 		const [bb, bo] = this.getSecondBestBidAsk();
 		let side = 1, price = -1;
-		while ((side === 1 && price < bb) || (side === -1 && price > bo)) {
+		while ((side === 1 && price < bb - 0.01) || (side === -1 && price > bo + 0.01)) {
 			[side, price] = this.generateOrder(quote);
 		}
 		return [side, price]
@@ -93,26 +93,19 @@ class CustomerOrders {
             const newquote = this.mm.trade(side, price, size);
             document.getElementById("print-quote").innerText = newquote;
         } else {
-            const [side, strikeStr, ins] = action.split(" ", 3);
-            const strike = Math.round(parseFloat(this.getDigitsPrefix(strikeStr)), 1);
-            const s = side === "buy" ? -1 : 1;
-
-            const key = [ins, strike, s].toString();
-			this.fillOrder(key);
+            console.log("Invalid action");
             
         }
     }
 
 	addRestingOrder(ins, strike, s, price, size) {
-		const key = [ins, strike, s].toString();
+		const key = [ins, strike, s, price, size].toString();
         const side = s === 1 ? "bid" : "offer";
-		if (this.orders.get(key)) {
-			const [oldPrice, _] = this.orders.get(key);
-			this.orders.set(key , [Math.max(s * oldPrice, s * price), size]);
-			// mark the trade as cancelled
-		} else {
-			this.orders.set(key, [price, size]);
-		}
+		if (this.orders.has(key)) {
+			// remove old order
+			return;
+		} 
+		this.orders.add(key);
 
 		// Create text description for display
 		const instext = this.stockinfo.insToText(ins, strike);
@@ -132,9 +125,7 @@ class CustomerOrders {
 		  const listItem = event.target.closest('li');
 		  
 		  // Get the orderKey from the li's dataset
-		  const key = listItem.dataset.orderKey;
-		  
-		  this.fillOrder(key);
+		  this.fillOrder(event.target, listItem.dataset.orderKey);
 		};	
 		// Store the key as a data attribute for easy access when removing
 		li.dataset.orderKey = key;
@@ -150,12 +141,11 @@ class CustomerOrders {
 	}
 
 	// Function to remove item from resting orders list and the Map
-	fillOrder(key) {
+	fillOrder(button, key) {
 		// Remove from the orders Map
 		if (this.orders.has(key)) {
-			const [price, size] = this.orders.get(key);
 			this.orders.delete(key);
-            document.getElementById("responseText").textContent = `Traded ${size}x ${key} at ${price}`;
+            document.getElementById("responseText").textContent = `Traded ${key}`;
 		} else {
 			document.getElementById("responseText").textContent = `${key} not found`;
 			console.log(this.orders);
@@ -169,7 +159,7 @@ class CustomerOrders {
 				// itemsList.removeChild(item);
 			}
 		}
-		
+		/*
 		// identify button based on the key and update button
 		const listItem = document.querySelector(`li[data-order-key="${key}"]`);
 		if (!listItem) {
@@ -180,6 +170,7 @@ class CustomerOrders {
 		// Find the text element and button within this list item
 		const textElement = listItem.querySelector('.item-text');
 		const button = listItem.querySelector('.item-button');	
+		*/
 		
 		// Toggle button color
 		button.classList.toggle('active');
