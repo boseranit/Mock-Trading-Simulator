@@ -67,9 +67,14 @@ class CustomerOrders {
 
 	generateGoodOrder(quote = null) {
 		// ensures that generated order beats second best bid or ask
-		const [bb, bo] = this.getSecondBestBidAsk();
+		let [bb, bo] = this.getSecondBestBidAsk();
+		if (quote !== null) {
+			const mid = (quote[0]+quote[1])/2;
+			bb = Math.max(bb, mid);
+			bo = Math.min(bo, mid);
+		}
 		let side = 1, price = -1;
-		while ((side === 1 && price < bb - 0.01) || (side === -1 && price > bo + 0.01)) {
+		while ((side === 1 && price < bb + 0.01) || (side === -1 && price > bo - 0.01)) {
 			[side, price] = this.generateOrder(quote);
 		}
 		return [side, price]
