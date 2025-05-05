@@ -48,7 +48,7 @@ class MarketMaker {
 		printArea.textContent = `side: ${side}  price: ${price}  size: ${size}`;
 
 		const relSize = size / this.DEFAULT_SZ;
-		const alpha = normCDF(relSize, 3, 1.5);
+		const alpha = normCDF(relSize, 2, 1.5);
 		price = Math.min(price, this.mid + relSize * this.edge);
 		price = Math.max(price, this.mid - relSize * this.edge);
 

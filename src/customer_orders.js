@@ -49,7 +49,7 @@ class CustomerOrders {
             [bid, ask] = quote;
         }
 
-        let side = Math.random() < 0.5 ? -1 : 1;
+        let side = fair > (bid + ask)/2 ? 1 : -1;
         let price = null;
 
         if (bid <= fair && fair <= ask) {
@@ -77,6 +77,8 @@ class CustomerOrders {
 		while ((side === 1 && price < bb + 0.01) || (side === -1 && price > bo - 0.01)) {
 			[side, price] = this.generateOrder(quote);
 		}
+		console.log(this.orders);
+		console.log("2nd bb bo ", bb, bo);
 		return [side, price]
 	}
 

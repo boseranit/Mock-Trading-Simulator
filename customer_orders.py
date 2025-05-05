@@ -56,7 +56,7 @@ class CustomerOrders:
         if quote is not None:
             bid, ask = quote
 
-        side = random.choice([-1, 1])
+        side = 1 if fair > (bid+ask)/2 else -1
         price = None
         if bid <= fair <= ask:
             price = fair - side * edge
@@ -135,12 +135,12 @@ class CustomerOrders:
                 map(lambda p: self.stockinfo.ins_to_stock(p, ins, strike), quote)
             )
             stockquote = tuple(sorted(stockquote))
-            print("implied stock", stockquote)  # TODO: remove after testing
+            print("implied stock", stockquote)  # optional: remove after testing
 
         s, price = self.generate_good_order(stockquote)
-        print(f"(stock {s} {price}", end="")
+        # print(f"(stock {s} {price}", end="")
         s, price = self.stockinfo.stock_to_ins(s, price, ins, strike)
-        print(f"{instext} {s} {price})")  # TODO: remove after testing
+        # print(f"{instext} {s} {price})")  # TODO: remove after testing
         side = "bid" if s == 1 else "offer"
         if quote is not None and side == "bid" and price >= quote[1]:
             print(f"Cust buys at {quote[1]}")
