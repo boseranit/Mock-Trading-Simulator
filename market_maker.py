@@ -47,7 +47,7 @@ class MarketMaker:
         return uptick
 
     def format_quote(self, bid, bs, offer, os):
-        return f"Stock: {bid:.2f}/{bs:.0f} @ {offer:.2f}/{os:.0f}"
+        return "-"*11+f"Stock: {bid:.2f}/{bs:.0f} @ {offer:.2f}/{os:.0f}"+"-"*11
 
     def quote(self, b=1, o=1):
         self.bid = self.mid - self.edge

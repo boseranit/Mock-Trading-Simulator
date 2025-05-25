@@ -85,7 +85,7 @@ class CustomerOrders:
             - buy/sell stock "sell 76.40 10k"
             - next step "done"
         """
-        if "done" in action:
+        if "done" in action or action == "":
             # new customer order and print resting orders
             self.next_step()
             return
@@ -104,7 +104,7 @@ class CustomerOrders:
             custtext = self.stockinfo.ins_to_text(ins, strike) + f" {side}"
             if (ins, strike, s) in self.orders:
                 price, size = self.orders.pop((ins, strike, s))
-                print(f"Traded {size}x {custtext} at {price}")
+                print(f"Traded {size}x {custtext} at {price:.2f}")
             else:
                 print(f"{custtext} not found")
                 print(self.orders.keys())
@@ -112,6 +112,7 @@ class CustomerOrders:
     def next_step(self):
         # print resting orders then
         # either ask for market or show customer order
+        '''
         if len(self.orders) > 0:
             print("Resting orders:")
             for key in self.orders:
@@ -122,6 +123,7 @@ class CustomerOrders:
                     f"{self.stockinfo.ins_to_text(ins, strike)} {size}x {side} {price:.2f}"
                 )
             print("\n")
+        '''
 
         ins, strike = self.stockinfo.choose_ins(self.mm.mid)
         size = self.mm.DEFAULT_SZ * random.randint(1, 13)
