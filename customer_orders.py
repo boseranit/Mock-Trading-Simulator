@@ -85,29 +85,32 @@ class CustomerOrders:
             - buy/sell stock "sell 76.40 10k"
             - next step "done"
         """
-        if "done" in action or action == "":
-            # new customer order and print resting orders
-            self.next_step()
-            return
-        if action[-1] == "k":
-            side, price, size = action.split()
-            price = float(price)
-            size = int(size[:-1]) * 10
-            # shares transaction
-            newquote = self.mm.trade(side, price, size)
-            print(newquote)
-        else:
-            side, strike, ins = action.split(" ", 2)
-            strike = round(float(get_digits_prefix(strike)), 1)
-            side = "offer" if side == "buy" else "bid"
-            s = -1 if side == "offer" else 1
-            custtext = self.stockinfo.ins_to_text(ins, strike) + f" {side}"
-            if (ins, strike, s) in self.orders:
-                price, size = self.orders.pop((ins, strike, s))
-                print(f"Traded {size}x {custtext} at {price:.2f}")
+        try:
+            if "done" in action or action == "":
+                # new customer order and print resting orders
+                self.next_step()
+                return
+            if action[-1] == "k":
+                side, price, size = action.split()
+                price = float(price)
+                size = int(size[:-1]) * 10
+                # shares transaction
+                newquote = self.mm.trade(side, price, size)
+                print(newquote)
             else:
-                print(f"{custtext} not found")
-                print(self.orders.keys())
+                side, strike, ins = action.split(" ", 2)
+                strike = round(float(get_digits_prefix(strike)), 1)
+                side = "offer" if side == "buy" else "bid"
+                s = -1 if side == "offer" else 1
+                custtext = self.stockinfo.ins_to_text(ins, strike) + f" {side}"
+                if (ins, strike, s) in self.orders:
+                    price, size = self.orders.pop((ins, strike, s))
+                    print(f"Traded {size}x {custtext} at {price:.2f}")
+                else:
+                    print(f"{custtext} not found")
+                    print(self.orders.keys())
+        except:
+            print("could not parse action")
 
     def next_step(self):
         # print resting orders then

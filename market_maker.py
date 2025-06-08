@@ -16,7 +16,7 @@ from generate_stock import StockProperties
 class MarketMaker:
     def __init__(self, stockinfo):
         self.stockinfo = stockinfo
-        self.CONV_WIDTH = random.triangular(0.02, 0.30, 0.10)
+        self.CONV_WIDTH = random.triangular(0.02, 0.25, 0.10)
         self.mid = None
         self.width = None
         self.DEFAULT_SZ = random.randrange(30, 101, 10)
