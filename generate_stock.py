@@ -36,7 +36,7 @@ class StockProperties:
         self.sigma = random.uniform(20, 40) / self.stock
 
     def round(self, num):
-        return int(num) if num.is_integer() else round(num * 2)/2
+        return int(num) if float(num).is_integer() else round(num * 2)/2
 
     def get_options(self, stock=None):
         if stock is None:
