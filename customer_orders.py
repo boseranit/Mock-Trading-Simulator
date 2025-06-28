@@ -3,6 +3,7 @@ from market_maker import MarketMaker
 from mockboard import MockBoard
 import random
 import re
+import traceback
 
 
 def get_digits_prefix(text):
@@ -110,7 +111,8 @@ class CustomerOrders:
                     print(f"{custtext} not found")
                     print(self.orders.keys())
         except:
-            print("could not parse action")
+            print("could not parse action", action)
+            traceback.print_exc()
 
     def next_step(self):
         # print resting orders then
@@ -128,23 +130,23 @@ class CustomerOrders:
             print("\n")
         '''
 
-        ins, strike = self.stockinfo.choose_ins(self.mm.mid)
+        ins, strike, strike2 = self.stockinfo.choose_ins(self.mm.mid)
         size = self.mm.DEFAULT_SZ * random.randint(1, 13)
-        instext = self.stockinfo.ins_to_text(ins, strike)
+        instext = self.stockinfo.ins_to_text(ins, strike, strike2)
         quote = None
         stockquote = None
         if random.random() < self.Pmarket:
             print(f"Make a market in {instext} {size}x")
             quote = list(map(float, input().split()))
             stockquote = tuple(
-                map(lambda p: self.stockinfo.ins_to_stock(p, ins, strike), quote)
+                map(lambda p: self.stockinfo.ins_to_stock(p, ins, strike, strike2), quote)
             )
             stockquote = tuple(sorted(stockquote))
             print("implied stock", stockquote)  # optional: remove after testing
 
         s, price = self.generate_good_order(stockquote)
         # print(f"(stock {s} {price}", end="")
-        s, price = self.stockinfo.stock_to_ins(s, price, ins, strike)
+        s, price = self.stockinfo.stock_to_ins(s, price, ins, strike, strike2)
         # print(f"{instext} {s} {price})")  # TODO: remove after testing
         side = "bid" if s == 1 else "offer"
         if quote is not None and side == "bid" and price >= quote[1]:
